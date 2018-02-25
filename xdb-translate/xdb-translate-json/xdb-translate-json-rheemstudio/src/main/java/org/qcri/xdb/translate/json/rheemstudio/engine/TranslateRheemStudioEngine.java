@@ -16,7 +16,7 @@ public class TranslateRheemStudioEngine extends XdbEngine {
 
     @Override
     public XdbPlan doexecute(XdbPlan plan, Object... obj) {
-
+        return plan;
 
     }
 

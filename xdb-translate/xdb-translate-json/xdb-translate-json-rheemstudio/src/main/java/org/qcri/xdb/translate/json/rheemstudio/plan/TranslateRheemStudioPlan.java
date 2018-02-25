@@ -61,7 +61,7 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
                 op.addConnects_to(new Conexion(output.getOperator(i).getAlias()));
             }
             pos_x += pos_plus;
-            this.schema.addOperator();
+            this.schema.addOperator(op);
         }
 
         return schema;
