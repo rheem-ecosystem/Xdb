@@ -1,17 +1,16 @@
 package org.qcri.xdb.parser.rheemlatin.engine;
 
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.qcri.xdb.core.engine.XdbEngine;
 import org.qcri.xdb.core.plan.XdbPlan;
 import org.qcri.xdb.parser.rheemlatin.context.ParserRheemLatinContext;
+import org.qcri.xdb.parser.rheemlatin.exception.ParserRheemLatinException;
 import org.qcri.xdb.parser.rheemlatin.parser.ConvertListener;
 import org.qcri.xdb.parser.rheemlatin.parser.LatinLexer;
 import org.qcri.xdb.parser.rheemlatin.parser.LatinParser;
 import org.qcri.xdb.parser.rheemlatin.query.plan.FileInputPlan;
+import org.qcri.xdb.parser.rheemlatin.query.plan.StringPlan;
 import org.qcri.xdb.util.exception.XdbException;
 
 import java.io.IOException;
@@ -32,29 +31,39 @@ public class ParserRheemLatinEngine extends XdbEngine {
     @Override
     public XdbPlan doexecute(XdbPlan plan, Object... obj) {
         System.out.println("parserLatinEngine");
-        if(plan instanceof FileInputPlan){
-            FileInputPlan file = (FileInputPlan)plan;
-            try {
-                CharStream archivo       = new ANTLRFileStream(file.getPath());
-                CommonTokenStream tokens = new CommonTokenStream(new LatinLexer(archivo));
-                LatinParser parser       = new LatinParser(tokens);
 
-                ParserRuleContext ast    = parser.query();
-                ConvertListener listener = new ConvertListener();
-                ParseTreeWalker walker   = new ParseTreeWalker();
 
-                walker.walk(listener, ast);
+        try {
+            CharStream charStream;
+            if (plan instanceof FileInputPlan) {
+                FileInputPlan filePlan = (FileInputPlan) plan;
+                charStream = new ANTLRFileStream(filePlan.getPath());
 
-                XdbPlan plan_output = listener.getPlan();
-                plan_output.print();
-                return plan_output;
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (XdbException e){
-                e.printStackTrace();
-                System.exit(1);
+            } else if (plan instanceof StringPlan) {
+                StringPlan stringPlan = (StringPlan) plan;
+                charStream = new ANTLRInputStream(stringPlan.getPlanString());
+            } else {
+                throw new ParserRheemLatinException("the type of query is not supported");
             }
-            return null;
+
+            CommonTokenStream tokens = new CommonTokenStream(new LatinLexer(charStream));
+            LatinParser parser = new LatinParser(tokens);
+
+            ParserRuleContext ast = parser.query();
+            ConvertListener listener = new ConvertListener();
+            ParseTreeWalker walker = new ParseTreeWalker();
+
+            walker.walk(listener, ast);
+
+            XdbPlan plan_output = listener.getPlan();
+            plan_output.print();
+            return plan_output;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (XdbException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
         return null;
     }

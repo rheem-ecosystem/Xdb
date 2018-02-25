@@ -1,6 +1,6 @@
-package org.qcri.xdb.api.rest.model.rheemstudio;
+package org.qcri.xdb.translate.json.rheemstudio.model;
 
-public class RSParameter {
+public class Parameter {
 
     private int id;
     private String value;

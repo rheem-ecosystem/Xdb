@@ -11,6 +11,7 @@ public class RheemLatinFileQuery extends XdbQuery {
     public RheemLatinFileQuery(String query_path){
         this.path = query_path;
     }
+
     @Override
     public XdbPlan convert() {
         return new FileInputPlan(this.path);
