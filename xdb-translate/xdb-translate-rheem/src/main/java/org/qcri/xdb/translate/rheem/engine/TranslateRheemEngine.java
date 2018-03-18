@@ -7,12 +7,18 @@ import org.qcri.xdb.translate.rheem.exception.TranslateRheemException;
 import org.qcri.xdb.translate.rheem.plan.TranslateRheemPlan;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class TranslateRheemEngine extends XdbEngine {
 
     public TranslateRheemEngine(String name) {
         super(name);
-        this.context = new TranslateRheemContext(URI.create("/resources/latin.conf.mapping.json"));
+        try {
+            ClassLoader classLoader = getClass().getClassLoader();
+            this.context = new TranslateRheemContext(classLoader.getResource("latin.conf.mapping.json").toURI());
+        } catch (URISyntaxException e) {
+            throw new TranslateRheemException(e);
+        }
     }
 
     @Override

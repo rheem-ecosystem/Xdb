@@ -15,12 +15,19 @@ import org.qcri.xdb.util.exception.XdbException;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Enumeration;
 
 public class ParserRheemLatinEngine extends XdbEngine {
     public ParserRheemLatinEngine(String name) {
         super(name);
-        //TODO change the path
-        this.context = new ParserRheemLatinContext(URI.create("/resources/latin.conf.operator.json"));
+        try {
+            ClassLoader classLoader = getClass().getClassLoader();
+            this.context = new ParserRheemLatinContext(classLoader.getResource("latin.conf.operator.json").toURI());
+        } catch (URISyntaxException e) {
+            throw new ParserRheemLatinException(e);
+        }
     }
 
     @Override
