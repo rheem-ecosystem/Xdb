@@ -38,11 +38,10 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
         schema = new Schema();
 
         int pos_x = 10;
-        int pos_y = 10;
+        int pos_y = 70;
         int pos_plus = 50;
         String color = "ffffff";
         for(XdbOperator xdbOperator: this.operators){
-            System.out.println(xdbOperator.getAlias());
             Operator op = new Operator()
                     .setName(xdbOperator.getAlias())
                     //.setJava_class()
@@ -51,35 +50,49 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
                     .setColor(color)
                     .setParameters(null)
                     //.setSelectedConstructor()
-                    //.setIsbroadcast()
-                    //.setType()
-                    //.setBroadcasts_to()
                     .setNp_inputs(xdbOperator.getInputs().getSize())
                     .setNp_outputs(xdbOperator.getOutputs().getSize());
+            int type = 0;
+            if(op.getNp_outputs() == 0){
+                type -= 1;
+            }
+            if(op.getNp_inputs() == 0){
+                type += 1;
+            }
+            switch (type){
+                case 0:
+                    op.setType("unary");
+                    break;
+                case 1:
+                    op.setType("source");
+                    break;
+                case -1:
+                    op.setType("sink");
+                    break;
+            }
+
+
 
             XdbComponent output =  xdbOperator.getOutputs();
             for(int i =0; i< output.getSize(); i++){
-                op.addConnects_to(
-                    new Conexion(
-                            output.getAlias(i)
-                    )
-                );
+                op.addConnects_to(new Object[]{output.getAlias(i), i});
             }
             List<String> broadcast = xdbOperator.getBroadcastName();
             if(broadcast.size() > 0){
                 op.setIsbroadcast(true);
-                List<Conexion> con_broad = new ArrayList<>();
+                int i = 0;
                 for(String name_broad: broadcast){
-                    con_broad.add(new Conexion(name_broad));
+                    op.add_broadcast(new Object[]{name_broad, i});
+                    i++;
                 }
-                op.setBroadcasts_to(con_broad);
+               // op.setBroadcasts_to(con_broad);
             }
 
             if(op.getNp_outputs() == 0){
                 schema.getSink_operators().add(op.getName());
             }
 
-            pos_x += pos_plus;
+            pos_y += pos_plus;
             this.schema.addOperator(op);
         }
 

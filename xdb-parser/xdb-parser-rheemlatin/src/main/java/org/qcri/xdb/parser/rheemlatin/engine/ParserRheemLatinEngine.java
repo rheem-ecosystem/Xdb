@@ -70,7 +70,7 @@ public class ParserRheemLatinEngine extends XdbEngine {
             walker.walk(listener, ast);
 
             XdbPlan plan_output = listener.getPlan();
-            plan_output.print();
+            //plan_output.print();
             return plan_output;
 
         } catch (IOException e) {

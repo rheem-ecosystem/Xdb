@@ -127,7 +127,7 @@ public class ConvertListener implements LatinParserListener
                     for (int i = 0; i < length; i++) {
 
                         String key = this.map_getAlias.get(op_current.getAliasInput(i));
-                        System.out.println(op_current);
+                     //   System.out.println(op_current);
                         key = (key == null || key.compareTo( ele.getAlias()) == 0)? op_current.getAliasInput(i): key;
 
                         if(key != op_current.getAliasInput(i)){

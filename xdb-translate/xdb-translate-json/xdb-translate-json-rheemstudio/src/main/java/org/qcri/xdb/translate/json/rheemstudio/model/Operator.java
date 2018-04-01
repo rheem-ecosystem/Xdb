@@ -1,5 +1,11 @@
 package org.qcri.xdb.translate.json.rheemstudio.model;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +20,8 @@ public class Operator {
     private int selectedConstructor;
     private boolean isbroadcast;
     private String type;
-    private List<Conexion> connects_to;
-    private List<Conexion> broadcasts_to;
+    private Conexion connects_to = new Conexion();
+    private Conexion broadcasts_to = new Conexion();
     private int np_inputs;
     private int np_outputs;
 
@@ -100,30 +106,40 @@ public class Operator {
         return this;
     }
 
-    public List<Conexion> getConnects_to() {
-        return connects_to;
+    public Conexion getConnects_to() {
+        return this.connects_to;
     }
 
-    public Operator setConnects_to(List<Conexion> connects_to) {
+    public Operator setConnects_to(Conexion connects_to) {
         this.connects_to = connects_to;
         return this;
     }
 
-    public void addConnects_to(Conexion conexion){
+    public void addConnects_to(Object[] conexion){
         if(this.connects_to == null){
-            this.connects_to = new ArrayList<>();
+            this.connects_to = new Conexion();
         }
         this.connects_to.add(conexion);
     }
 
-    public List<Conexion> getBroadcasts_to() {
+    public Conexion getBroadcasts_to() {
+        return broadcasts_to;
+    }
+
+    public void add_broadcast(Object[] conexion){
+        if(this.broadcasts_to == null){
+            this.broadcasts_to = new Conexion();
+        }
+        this.broadcasts_to.add(conexion);
+    }
+   /* public List<Conexion> getBroadcasts_to() {
         return broadcasts_to;
     }
 
     public Operator setBroadcasts_to(List<Conexion> broadcasts_to) {
         this.broadcasts_to = broadcasts_to;
         return this;
-    }
+    }*/
 
     public int getNp_inputs() {
         return np_inputs;
@@ -142,4 +158,5 @@ public class Operator {
         this.np_outputs = np_outputs;
         return this;
     }
+
 }
