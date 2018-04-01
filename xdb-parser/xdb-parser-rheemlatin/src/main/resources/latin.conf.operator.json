@@ -71,6 +71,14 @@
       "name": "UNION",
       "nfunction": "2",
       "type": "BinaryToUnary"
+    },{
+      "name": "REPEAT",
+      "nfunction": "0",
+      "type": "Loop"
+    },{
+      "name": "REDUCE",
+      "nfunction": "2",
+      "type": "UnaryToUnary"
     }
   ],
   "wrapper_mapping" : [

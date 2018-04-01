@@ -91,6 +91,7 @@ public class RheemContextTransition {
     }
 
     private Map<RheemClassTransition, Class> getPackageClass(){
+        System.out.println(package_rheem);
         Reflections reflex = new Reflections(package_rheem);
         Map<RheemClassTransition, Class> map = new HashMap<>();
         try{

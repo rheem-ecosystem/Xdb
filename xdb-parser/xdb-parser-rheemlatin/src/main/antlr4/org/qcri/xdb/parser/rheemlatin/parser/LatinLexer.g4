@@ -298,6 +298,8 @@ BROADCAST :   'BROADCAST';//|'broadcast';
 PLATFORM  :   'PLATFORM';//|'platform';
 DELIMITER :   'DELIMITER';
 KEY       :   'KEY';
+LIKE      :   'LIKE';
+FOR       :   'FOR';
 
 
 

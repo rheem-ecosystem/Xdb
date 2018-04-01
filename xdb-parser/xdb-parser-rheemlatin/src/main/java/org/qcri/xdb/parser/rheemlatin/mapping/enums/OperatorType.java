@@ -8,7 +8,8 @@ public enum OperatorType {
     UNARY_TO_UNARY("UnaryToUnary"),
     SINK("Sink"),
     SOURCE("Source"),
-    WRAPPER("Wrapper");
+    WRAPPER("Wrapper"),
+    LOOP("Loop");
 
 
     private String text;

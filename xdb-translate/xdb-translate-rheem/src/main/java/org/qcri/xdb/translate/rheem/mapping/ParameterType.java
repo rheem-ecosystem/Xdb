@@ -5,6 +5,7 @@ import org.qcri.xdb.translate.rheem.exception.TranslateRheemException;
 public enum ParameterType {
     PREDICATE("predicate",org.qcri.rheem.core.function.FunctionDescriptor.SerializablePredicate.class),
     FUNCTION("function", org.qcri.rheem.core.function.FunctionDescriptor.SerializableFunction.class),
+    INTEGER("integer", int.class),
     CLASS("class", Class.class),
     STRING("string", String.class),
     STRING_ARRAY("string[]",String[].class);

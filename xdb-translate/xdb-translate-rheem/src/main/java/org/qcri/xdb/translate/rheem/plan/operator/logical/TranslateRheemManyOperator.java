@@ -30,6 +30,7 @@ public class TranslateRheemManyOperator  extends TranslateRheemOperator {
         Class type_return = this.outputs.getType(0);;
         for(int i = 0; i < this.params.length; i++){
             if( params[i] == ParameterType.FUNCTION || params[i] == ParameterType.PREDICATE) {
+                System.out.println("lala "+this);
                 if(this.inputs.getExpression(expre_index).isImplemented()){
                     RealFunctionExpression expre = (RealFunctionExpression) this.inputs.getExpression(expre_index);
                     Object[] parameters = expre.getParameters_method();

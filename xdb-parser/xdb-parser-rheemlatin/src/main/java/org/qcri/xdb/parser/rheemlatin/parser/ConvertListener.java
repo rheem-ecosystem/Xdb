@@ -20,6 +20,7 @@ import org.qcri.xdb.parser.rheemlatin.exception.ParserRheemLatinException;
 import org.qcri.xdb.parser.rheemlatin.plan.ParserRheemLatinPlan;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class ConvertListener implements LatinParserListener
 {
@@ -67,6 +68,13 @@ public class ConvertListener implements LatinParserListener
 
     private LoadMockupClass operator_builder = null;
 
+    private Queue<String> loop_instruction_queue = null;
+    private List<String> loop_instruction_list = null;
+    private LoopOperator loop_operator = null;
+
+
+    private boolean strictValidation = true;
+
     public ConvertListener(){
         this.plan              = new ParserRheemLatinPlan();
         this.expressions       = new Stack<XdbExpression>();
@@ -84,6 +92,12 @@ public class ConvertListener implements LatinParserListener
         this.structureMap      = new HashMap<String, XdbStructure>();
         this.operator_builder  = ParserRheemLatinContext.getLoaderClass();
     }
+
+    public ConvertListener(boolean strictValidation){
+        this();
+        this.strictValidation  = strictValidation;
+    }
+
 
     public XdbPlan getPlan(){
         return this.plan;
@@ -106,9 +120,14 @@ public class ConvertListener implements LatinParserListener
                     OperatorInput op_current = (OperatorInput) ele;
                     int length = op_current.getSizeInput();
 
+                  /*  if(ele instanceof LoopOperator){
+                        length = 1;
+                    }*/
+
                     for (int i = 0; i < length; i++) {
 
                         String key = this.map_getAlias.get(op_current.getAliasInput(i));
+                        System.out.println(op_current);
                         key = (key == null || key.compareTo( ele.getAlias()) == 0)? op_current.getAliasInput(i): key;
 
                         if(key != op_current.getAliasInput(i)){
@@ -119,7 +138,7 @@ public class ConvertListener implements LatinParserListener
 
                         if( !(op_next instanceof OperatorOutput) ){
                             throw new ParserRheemLatinException(
-                                    String.format("the Operator (%s) not have outputs", op_next)
+                                    String.format("the Operator (%s) not have outputs %s", op_next, key)
                             );
                         }
 
@@ -142,6 +161,9 @@ public class ConvertListener implements LatinParserListener
                         ((OperatorOutput)op_next).setAliasOutput(0, ele.getAlias());
 
                         op_current.setTypeInput(i, ((OperatorOutput)op_next).getTypeOutput(0));
+                        if(op_current instanceof LoopOperator){
+                            ((LoopOperator) op_current).setTypeOutput(i, ((LoopOperator) op_current).getTypeInput(i));
+                        }
                     }
                     ele.changeTypes();
                     //TODO: hacer parametrico
@@ -265,13 +287,17 @@ public class ConvertListener implements LatinParserListener
                         if(op.getTypeInput(i) == null){
                             OperatorOutput previuos = (OperatorOutput) this.map_alias.get(op.getAliasInput(i));
                             //TODO hacerlo para que sea generico
+                            int index_output = 0;
+                            if(previuos instanceof LoopOperator){
+                                index_output = 1;
+                            }
                             if(previuos.getTypeOutput(0) == null){
                                 ((XdbOperator)previuos).changeTypes();
-                                op.setTypeInput(0, previuos.getTypeOutput(0));
+                                op.setTypeInput(0, previuos.getTypeOutput(index_output));
                             }
 
                             //TODO hacerlo para que sea generico
-                            if(previuos.getTypeOutput(0) == null){
+                            if(previuos.getTypeOutput(index_output) == null){
                                 throw new ParserRheemLatinException(
                                         String.format("Not exist class for conexion beetween %s and %s", operator, previuos)
                                 );
@@ -374,10 +400,32 @@ public class ConvertListener implements LatinParserListener
         this.alias_structure_current = null;
     }
 
+    @Override
+    public void enterLoopStatement(LatinParser.LoopStatementContext ctx) {
+        addAlias(ctx.ID().getText());
+    }
+
+    @Override
+    public void exitLoopStatement(LatinParser.LoopStatementContext ctx) {
+        this.loop_operator.setAlias( ctx.ID().getText());
+        this.map_alias.put(this.loop_operator.getAlias(), this.loop_operator);
+        this.operators.add(this.loop_operator);
+
+        this.loop_operator = null;
+
+    }
+
 
     @Override
     public void enterOperatorStatement(LatinParser.OperatorStatementContext ctx) {
         ManyOperator operator = this.operator_builder.getOperatorMany(ctx.OPERATOR_NAME().getText());
+        if(loop_operator != null){
+            this.alias_actual = this.loop_instruction_queue.poll();
+
+            if(this.alias_actual == null){
+                throw new ParserRheemLatinException("the operators in the loop is finished");
+            }
+        }
         operator.setAlias(this.alias_actual);
 
         this.map_alias.put(this.alias_actual, operator);
@@ -443,7 +491,6 @@ public class ConvertListener implements LatinParserListener
 
 
         this.input_alias.clear();
-
     }
 
 
@@ -472,16 +519,20 @@ public class ConvertListener implements LatinParserListener
             System.out.println(_alias);
             throw new ParserRheemLatinException("error with the function");
         }*/
+        XdbExpression real;
+        if(this.strictValidation == false){
+            real = new DummyFunction(_alias);
+        }else {
+            if (!this.enviromentMap.containsKey(class_name)) {
+                //TODO: create a good description
+                throw new ParserRheemLatinException("la clase no es clase " + class_name);
+            }
 
-        if( !this.enviromentMap.containsKey(class_name)){
-            //TODO: create a good description
-            throw new ParserRheemLatinException("la clase no es clase "+class_name);
+            ClassEnviroment clazz = (ClassEnviroment) this.enviromentMap.get(class_name);
+
+            real = new RealFunctionExpression(_alias, clazz, method_name);
+
         }
-
-        ClassEnviroment clazz = (ClassEnviroment) this.enviromentMap.get(class_name);
-
-        RealFunctionExpression real = new RealFunctionExpression(_alias, clazz, method_name );
-
         this.expressions.push(real);
         this.input_alias.push(alias);
 
@@ -1026,6 +1077,49 @@ public class ConvertListener implements LatinParserListener
     @Override
     public void exitInclude_statement(LatinParser.Include_statementContext ctx) {
 
+    }
+
+    @Override
+    public void enterLoop_statement(LatinParser.Loop_statementContext ctx) {
+        if(this.loop_instruction_queue == null){
+            this.loop_instruction_queue = new LinkedList<>();
+            this.loop_instruction_list = new ArrayList<>();
+        }else{
+            throw new ParserRheemLatinException("The loop have a problem with the init stage");
+        }
+        this.loop_operator = this.operator_builder.getLoopMapping(ctx.OPERATOR_NAME().getText());
+
+        this.loop_operator.setAliasInput(0, ctx.ID(0).getText());
+    }
+
+    @Override
+    public void exitLoop_statement(LatinParser.Loop_statementContext ctx) {
+    }
+
+    @Override
+    public void enterLoop_convert(LatinParser.Loop_convertContext ctx) {
+
+    }
+
+    @Override
+    public void exitLoop_convert(LatinParser.Loop_convertContext ctx) {
+
+    }
+
+    @Override
+    public void enterLoop_body(LatinParser.Loop_bodyContext ctx) {
+         ctx.ID().forEach(
+             element -> {
+                 this.loop_instruction_queue.add(element.getText());
+                 this.addAlias(element.getText());
+             }
+         );
+    }
+
+    @Override
+    public void exitLoop_body(LatinParser.Loop_bodyContext ctx) {
+        String lastOp = ctx.ID().get(ctx.ID().size()-1).getText();
+        this.loop_operator.setAliasInput(1, lastOp);
     }
 
     @Override

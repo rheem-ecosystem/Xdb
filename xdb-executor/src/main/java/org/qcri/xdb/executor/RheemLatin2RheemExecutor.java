@@ -1,9 +1,13 @@
 package org.qcri.xdb.executor;
 
+import org.qcri.rheem.core.api.Job;
 import org.qcri.xdb.core.executor.XdbExecutor;
 import org.qcri.xdb.core.handler.XdbHandler;
 import org.qcri.xdb.core.handler.handlers.LinealHandler;
 import org.qcri.xdb.core.query.XdbQuery;
+import org.qcri.xdb.parser.rheemlatin.engine.ParserRheemLatinEngine;
+import org.qcri.xdb.parser.rheemlatin.query.RheemLatinFileQuery;
+import org.qcri.xdb.translate.rheem.engine.TranslateRheemEngine;
 
 public class RheemLatin2RheemExecutor extends XdbExecutor {
     public RheemLatin2RheemExecutor(XdbHandler handler) {
@@ -13,13 +17,13 @@ public class RheemLatin2RheemExecutor extends XdbExecutor {
 
     public static void main(String... args){
 
-       /* XdbQuery query = new XdbFileQuery(args[0]);
+        XdbQuery query = new RheemLatinFileQuery(args[0]);
 
         XdbHandler handler = new LinealHandler();
 
-        handler.registre(new ParserXdbEngine("parser"));
+        handler.registre(new ParserRheemLatinEngine("parser"));
         //  handler.registre(new OptimizerAlgebraicEngine("algebraic"));
-        handler.registre(new TranslatorRheemEngine("toRheem"));
+        handler.registre(new TranslateRheemEngine("toRheem"));
 
         handler.toconnect("parser", "toRheem");
         //  handler.toconnect("parser", "algebraic");
@@ -29,7 +33,7 @@ public class RheemLatin2RheemExecutor extends XdbExecutor {
 
         Job job = (Job) executor.execute(query);
 
-        job.execute();*/
+        job.execute();
 
     }
 }

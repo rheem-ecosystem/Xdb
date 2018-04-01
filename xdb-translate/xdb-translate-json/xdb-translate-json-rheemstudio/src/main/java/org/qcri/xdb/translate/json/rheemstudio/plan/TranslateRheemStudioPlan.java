@@ -26,8 +26,8 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
         aliasOperators = plan.getAliasOperators();
         sourceOperators= plan.getSourceOperators();
         sinkOperators  = plan.getSinkOperators();
-        enviroments = plan.getEnviroments();
-        structures = plan.getStructures();
+        enviroments    = plan.getEnviroments();
+        structures     = plan.getStructures();
     }
 
     @Override
@@ -42,8 +42,9 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
         int pos_plus = 50;
         String color = "ffffff";
         for(XdbOperator xdbOperator: this.operators){
+            System.out.println(xdbOperator.getAlias());
             Operator op = new Operator()
-                    .setName(xdbOperator.getName())
+                    .setName(xdbOperator.getAlias())
                     //.setJava_class()
                     .setX(pos_x)
                     .setY(pos_y)
@@ -58,8 +59,26 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
 
             XdbComponent output =  xdbOperator.getOutputs();
             for(int i =0; i< output.getSize(); i++){
-                op.addConnects_to(new Conexion(output.getOperator(i).getAlias()));
+                op.addConnects_to(
+                    new Conexion(
+                            output.getAlias(i)
+                    )
+                );
             }
+            List<String> broadcast = xdbOperator.getBroadcastName();
+            if(broadcast.size() > 0){
+                op.setIsbroadcast(true);
+                List<Conexion> con_broad = new ArrayList<>();
+                for(String name_broad: broadcast){
+                    con_broad.add(new Conexion(name_broad));
+                }
+                op.setBroadcasts_to(con_broad);
+            }
+
+            if(op.getNp_outputs() == 0){
+                schema.getSink_operators().add(op.getName());
+            }
+
             pos_x += pos_plus;
             this.schema.addOperator(op);
         }

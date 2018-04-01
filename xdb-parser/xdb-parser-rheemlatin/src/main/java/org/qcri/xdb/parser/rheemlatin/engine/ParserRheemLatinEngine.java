@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.Enumeration;
 
 public class ParserRheemLatinEngine extends XdbEngine {
+
+    private boolean strictValidate = true;
     public ParserRheemLatinEngine(String name) {
         super(name);
         try {
@@ -28,6 +30,11 @@ public class ParserRheemLatinEngine extends XdbEngine {
         } catch (URISyntaxException e) {
             throw new ParserRheemLatinException(e);
         }
+    }
+
+    public ParserRheemLatinEngine(String parser, boolean strictValidate) {
+        this(parser);
+        this.strictValidate = strictValidate;
     }
 
     @Override
@@ -57,7 +64,7 @@ public class ParserRheemLatinEngine extends XdbEngine {
             LatinParser parser = new LatinParser(tokens);
 
             ParserRuleContext ast = parser.query();
-            ConvertListener listener = new ConvertListener();
+            ConvertListener listener = new ConvertListener(strictValidate);
             ParseTreeWalker walker = new ParseTreeWalker();
 
             walker.walk(listener, ast);

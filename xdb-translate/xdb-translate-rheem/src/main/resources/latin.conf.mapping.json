@@ -40,14 +40,6 @@
         "string[]"
       ]
     },{
-      "name_latin": "LOADSQL",
-      "name_rheem": "PostgresTableSource",
-      "package_name": "org.qcri.rheem.postgres.operators",
-      "parameters": [
-        "string",
-        "string[]"
-      ]
-    },{
       "name_latin": "MAP",
       "name_rheem": "MapOperator",
       "parameters": [
@@ -101,6 +93,13 @@
       "name_latin": "UNION",
       "name_rheem": "UnionAllOperator",
       "parameters": [
+        "class"
+      ]
+    },{
+      "name_latin": "REPEAT",
+      "name_rheem": "RepeatOperator",
+      "parameters": [
+        "integer",
         "class"
       ]
     }

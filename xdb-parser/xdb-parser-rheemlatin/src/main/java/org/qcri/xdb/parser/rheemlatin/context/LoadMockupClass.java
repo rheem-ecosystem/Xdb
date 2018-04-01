@@ -3,10 +3,7 @@ package org.qcri.xdb.parser.rheemlatin.context;
 import org.qcri.xdb.core.plan.expression.FunctionExpression;
 import org.qcri.xdb.core.plan.expression.XdbExpression;
 import org.qcri.xdb.core.plan.operator.XdbOperator;
-import org.qcri.xdb.core.plan.operator.logical.ManyOperator;
-import org.qcri.xdb.core.plan.operator.logical.SinkOperator;
-import org.qcri.xdb.core.plan.operator.logical.SourceOperator;
-import org.qcri.xdb.core.plan.operator.logical.WrapperOperator;
+import org.qcri.xdb.core.plan.operator.logical.*;
 import org.qcri.xdb.parser.rheemlatin.ParserRheemLatin;
 import org.qcri.xdb.parser.rheemlatin.exception.ParserRheemLatinException;
 import org.qcri.xdb.parser.rheemlatin.mapping.FunctionMapping;
@@ -235,5 +232,22 @@ public class LoadMockupClass {
             );
         }
         return this.operators.get(name);
+    }
+
+    public LoopOperator getLoopMapping(String name){
+        if(!this.operators.containsKey(name)){
+            throw new ParserRheemLatinException("no exist the operator in the configuration file");
+        }
+
+        OperatorMapping op = (OperatorMapping) this.operators.get(name);
+        if(op.getType() != OperatorType.LOOP){
+            throw new ParserRheemLatinException("the operator is not a loop operator");
+        }
+
+        boolean convertFunction = (op.getNfunction() != 0);
+
+        LoopOperator operator = new LoopOperator(op.getName(), convertFunction);
+
+        return operator;
     }
 }

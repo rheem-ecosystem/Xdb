@@ -60,6 +60,7 @@ statement :
            ) with_platform? SEMI_COLON               #BaseStatement
    |   sink_statement with_platform? SEMI_COLON      #SinkStatement
    |   ID ASSING bag_stattement SEMI_COLON           #BagStatement
+   |   ID ASSING loop_statement                      #LoopStatement
 
 ;
 
@@ -187,4 +188,20 @@ class_define :
 
 include_statement :
     ID ASSING INCLUDE QUOTEDSTRING PLEFT ID+ PRIGHT SEMI_COLON
+;
+
+loop_statement :
+    name=OPERATOR_NAME ID LIKE ID (FOR NUMBER)? loop_convert? loop_body
+;
+
+loop_convert :
+        PLEFT
+            ( ID ASSING operator_statement SEMI_COLON )+
+        PRIGHT
+;
+
+loop_body :
+    ACCO_LEFT
+    ( ID ASSING operator_statement SEMI_COLON )+
+    ACCO_RIGHT
 ;

@@ -51,6 +51,9 @@ public class Schema {
     }
 
     public List<String> getSink_operators() {
+        if(this.sink_operators == null){
+            this.sink_operators = new ArrayList<>();
+        }
         return sink_operators;
     }
 

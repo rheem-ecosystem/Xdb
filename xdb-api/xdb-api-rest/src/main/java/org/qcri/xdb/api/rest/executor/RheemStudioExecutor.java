@@ -22,7 +22,7 @@ public class RheemStudioExecutor extends XdbExecutor{
      public static XdbExecutor create(){
          XdbHandler handler = new LinealHandler();
 
-         handler.registre(new ParserRheemLatinEngine("parser"));
+         handler.registre(new ParserRheemLatinEngine("parser", false));
          handler.registre(new TranslateRheemStudioEngine("toStudio"));
 
          handler.toconnect("parser", "toStudio");

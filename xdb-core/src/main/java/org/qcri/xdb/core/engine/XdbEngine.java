@@ -18,6 +18,7 @@ public abstract class XdbEngine {
             context.loadContext();
         } catch (XdbException e) {
             e.printStackTrace();
+            System.err.println(this.getClass());
             System.exit(-100);
         }
     }
