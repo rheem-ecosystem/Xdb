@@ -41,6 +41,10 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
         int pos_y = 70;
         int pos_plus = 50;
         String color = "ffffff";
+
+        HashMap<String, String> broadcast = new HashMap<>();
+        HashMap<String, Operator> ops = new HashMap<>();
+
         for(XdbOperator xdbOperator: this.operators){
             Operator op = new Operator()
                     .setName(xdbOperator.getAlias())
@@ -77,15 +81,15 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
             for(int i =0; i< output.getSize(); i++){
                 op.addConnects_to(new Object[]{output.getAlias(i), i});
             }
-            List<String> broadcast = xdbOperator.getBroadcastName();
-            if(broadcast.size() > 0){
+
+            List<String> list_broadcast = xdbOperator.getBroadcastName();
+            if(list_broadcast.size() > 0){
                 op.setIsbroadcast(true);
                 int i = 0;
-                for(String name_broad: broadcast){
-                    op.add_broadcast(new Object[]{name_broad, i});
+                for(String name_broad: list_broadcast){
+                    broadcast.put(name_broad+"#"+i, op.getName());
                     i++;
                 }
-               // op.setBroadcasts_to(con_broad);
             }
 
             if(op.getNp_outputs() == 0){
@@ -94,7 +98,23 @@ public class TranslateRheemStudioPlan extends XdbPlan implements XdbExecutable {
 
             pos_y += pos_plus;
             this.schema.addOperator(op);
+            ops.put(op.getName(), op);
+
         }
+
+        for(Map.Entry<String, String> entry: broadcast.entrySet()){
+            String name = entry.getKey().split("#")[0];
+            int pos = Integer.parseInt(entry.getKey().split("#")[1]);
+            //TODO remove this and put generic
+            if("current_centroid".compareTo(name) == 0){
+                name = "centroids";
+            }
+
+            Operator op = ops.get(name);
+            op.setIsbroadcast(true);
+            op.add_broadcast(new Object[]{entry.getValue(), pos});
+        }
+
 
         return schema;
     }
